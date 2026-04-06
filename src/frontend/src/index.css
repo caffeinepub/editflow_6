@@ -1,0 +1,132 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+
+    /* EditFlow Navy Blue palette – OKLCH L C H */
+    --background: 0.972 0.004 240;
+    --foreground: 0.15 0.025 255;
+    --card: 1 0 0;
+    --card-foreground: 0.15 0.025 255;
+    --popover: 1 0 0;
+    --popover-foreground: 0.15 0.025 255;
+
+    /* Navy primary: #2F4E6B */
+    --primary: 0.37 0.065 245;
+    --primary-foreground: 0.99 0 0;
+
+    /* Sidebar secondary */
+    --secondary: 0.955 0.008 240;
+    --secondary-foreground: 0.37 0.065 245;
+
+    --muted: 0.955 0.008 240;
+    --muted-foreground: 0.48 0.02 245;
+
+    /* Active nav highlight: #E9EFF6 */
+    --accent: 0.94 0.018 240;
+    --accent-foreground: 0.37 0.065 245;
+
+    --destructive: 0.577 0.245 27;
+    --destructive-foreground: 0.985 0 0;
+
+    --border: 0.91 0.012 240;
+    --input: 0.91 0.012 240;
+    --ring: 0.5 0.065 245;
+
+    /* Sidebar */
+    --sidebar: 0.969 0.006 240;
+    --sidebar-foreground: 0.15 0.025 255;
+    --sidebar-primary: 0.37 0.065 245;
+    --sidebar-primary-foreground: 0.99 0 0;
+    --sidebar-accent: 0.94 0.018 240;
+    --sidebar-accent-foreground: 0.37 0.065 245;
+    --sidebar-border: 0.91 0.012 240;
+    --sidebar-ring: 0.5 0.065 245;
+
+    /* Editor specific */
+    --editor-navy: 0.37 0.065 245;
+    --editor-workspace: 0.945 0.01 240;
+    --editor-page: 1 0 0;
+    --editor-btn-blue: 0.44 0.08 245;
+
+    --chart-1: 0.646 0.222 41;
+    --chart-2: 0.6 0.118 185;
+    --chart-3: 0.398 0.07 227;
+    --chart-4: 0.828 0.189 84;
+    --chart-5: 0.769 0.188 70;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  }
+}
+
+/* Editor page shadow */
+.editor-page-shadow {
+  box-shadow: 0 2px 16px 0 rgba(47, 78, 107, 0.12), 0 1px 4px 0
+    rgba(47, 78, 107, 0.06);
+}
+
+/* Navy title bar */
+.editor-title-bar {
+  background: oklch(0.35 0.072 247);
+}
+
+/* New document button gradient */
+.btn-new-doc {
+  background: linear-gradient(135deg, oklch(0.5 0.1 245), oklch(0.38 0.085 247));
+  color: white;
+  border: none;
+}
+
+.btn-new-doc:hover {
+  background: linear-gradient(
+    135deg,
+    oklch(0.46 0.1 245),
+    oklch(0.34 0.085 247)
+  );
+}
+
+/* Toolbar button active */
+.toolbar-btn-active {
+  background: oklch(0.92 0.018 240);
+  color: oklch(0.35 0.072 247);
+}
+
+/* Scroll area for doc list */
+.doc-list-scroll {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.85 0.015 240) transparent;
+}
+
+/* Editor content editable */
+.editor-content {
+  outline: none;
+  min-height: 600px;
+  font-size: 14.5px;
+  line-height: 1.75;
+  color: oklch(0.15 0.02 255);
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+.editor-content:focus {
+  outline: none;
+}
+
+/* Placeholder text */
+.editor-content:empty::before {
+  content: attr(data-placeholder);
+  color: oklch(0.65 0.015 240);
+  pointer-events: none;
+}
