@@ -1,3 +1,4 @@
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { Document, DocumentId } from "../../backend";
@@ -22,6 +23,7 @@ export default function EditorLayout() {
   const [sidebarView, setSidebarView] = useState<SidebarView>("all");
   const [showVersionHistory, setShowVersionHistory] = useState(false);
   const [activeFolderId, setActiveFolderId] = useState<bigint | null>(null);
+  const [mobileLeftOpen, setMobileLeftOpen] = useState(false);
 
   const { data: documents = [], isLoading } = useGetUserDocuments();
   const createDocument = useCreateDocument();
@@ -55,6 +57,7 @@ export default function EditorLayout() {
     setEditorTitle(doc.title);
     setEditorContent(doc.content);
     setHasUnsaved(false);
+    setMobileLeftOpen(false);
   }, []);
 
   const handleNewDocument = useCallback(async () => {
@@ -65,6 +68,7 @@ export default function EditorLayout() {
       setEditorTitle(title);
       setEditorContent("");
       setHasUnsaved(false);
+      setMobileLeftOpen(false);
       toast.success("New document created");
     } catch {
       toast.error("Failed to create document");
@@ -105,25 +109,59 @@ export default function EditorLayout() {
       className="h-screen flex flex-col overflow-hidden"
       style={{ background: "oklch(0.945 0.01 240)" }}
     >
-      <TopNav searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+      <TopNav
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        onMobileMenuOpen={() => setMobileLeftOpen(true)}
+      />
 
       <div className="flex flex-1 overflow-hidden">
-        <LeftSidebar
-          documents={filteredDocs}
-          allDocuments={documents}
-          activeDocId={activeDocId}
-          sidebarView={sidebarView}
-          onSidebarViewChange={setSidebarView}
-          onSelectDoc={handleSelectDoc}
-          onNewDocument={handleNewDocument}
-          isCreating={createDocument.isPending}
-          isLoading={isLoading}
-          activeFolderId={activeFolderId}
-          onFolderSelect={(fid) => {
-            setActiveFolderId(fid);
-            setSidebarView("folder");
-          }}
-        />
+        {/* Desktop sidebar — hidden on mobile */}
+        <div className="hidden md:flex">
+          <LeftSidebar
+            documents={filteredDocs}
+            allDocuments={documents}
+            activeDocId={activeDocId}
+            sidebarView={sidebarView}
+            onSidebarViewChange={setSidebarView}
+            onSelectDoc={handleSelectDoc}
+            onNewDocument={handleNewDocument}
+            isCreating={createDocument.isPending}
+            isLoading={isLoading}
+            activeFolderId={activeFolderId}
+            onFolderSelect={(fid) => {
+              setActiveFolderId(fid);
+              setSidebarView("folder");
+            }}
+          />
+        </div>
+
+        {/* Mobile sidebar sheet */}
+        <Sheet open={mobileLeftOpen} onOpenChange={setMobileLeftOpen}>
+          <SheetContent
+            side="left"
+            className="p-0 w-[280px]"
+            data-ocid="sidebar.mobile.sheet"
+          >
+            <LeftSidebar
+              documents={filteredDocs}
+              allDocuments={documents}
+              activeDocId={activeDocId}
+              sidebarView={sidebarView}
+              onSidebarViewChange={setSidebarView}
+              onSelectDoc={handleSelectDoc}
+              onNewDocument={handleNewDocument}
+              isCreating={createDocument.isPending}
+              isLoading={isLoading}
+              activeFolderId={activeFolderId}
+              onFolderSelect={(fid) => {
+                setActiveFolderId(fid);
+                setSidebarView("folder");
+                setMobileLeftOpen(false);
+              }}
+            />
+          </SheetContent>
+        </Sheet>
 
         <EditorCenter
           activeDoc={activeDoc}
@@ -151,7 +189,10 @@ export default function EditorLayout() {
           }}
         />
 
-        <RightPanel activeDoc={activeDoc} />
+        {/* Right panel — hidden on mobile/tablet, shown on large screens */}
+        <div className="hidden lg:flex">
+          <RightPanel activeDoc={activeDoc} />
+        </div>
       </div>
     </div>
   );

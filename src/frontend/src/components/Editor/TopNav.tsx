@@ -7,26 +7,43 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Bell, FileText, Search } from "lucide-react";
+import { Bell, FileText, Menu, Search } from "lucide-react";
 import { useInternetIdentity } from "../../hooks/useInternetIdentity";
 
 interface TopNavProps {
   searchQuery: string;
   onSearchChange: (q: string) => void;
+  onMobileMenuOpen?: () => void;
 }
 
 const NAV_LINKS = ["Dashboard", "Recent", "Shared", "Settings"];
 
-export default function TopNav({ searchQuery, onSearchChange }: TopNavProps) {
+export default function TopNav({
+  searchQuery,
+  onSearchChange,
+  onMobileMenuOpen,
+}: TopNavProps) {
   const { identity, clear } = useInternetIdentity();
   const principal = identity?.getPrincipal().toString() ?? "";
   const initials = principal ? principal.slice(0, 2).toUpperCase() : "U";
 
   return (
     <header
-      className="flex items-center h-[52px] px-4 gap-4 border-b border-border shrink-0 bg-white"
+      className="flex items-center h-[52px] px-4 gap-3 border-b border-border shrink-0 bg-white"
       style={{ boxShadow: "0 1px 3px rgba(47,78,107,0.07)" }}
     >
+      {/* Mobile hamburger — only on small screens */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="md:hidden w-8 h-8 shrink-0"
+        onClick={onMobileMenuOpen}
+        data-ocid="nav.mobile_menu.button"
+        aria-label="Open navigation menu"
+      >
+        <Menu className="w-5 h-5" style={{ color: "oklch(0.42 0.03 245)" }} />
+      </Button>
+
       {/* Logo */}
       <div className="flex items-center gap-2 shrink-0">
         <div
@@ -43,7 +60,7 @@ export default function TopNav({ searchQuery, onSearchChange }: TopNavProps) {
         </span>
       </div>
 
-      {/* Nav links */}
+      {/* Nav links — desktop only */}
       <nav className="hidden md:flex items-center gap-0.5 ml-2">
         {NAV_LINKS.map((link) => (
           <button

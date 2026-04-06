@@ -1,5 +1,18 @@
 import { Button } from "@/components/ui/button";
-import { Clock, Download, Loader2, Save, Share2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Clock,
+  Download,
+  Loader2,
+  MoreHorizontal,
+  Save,
+  Share2,
+} from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
@@ -57,16 +70,17 @@ export default function EditorCenter({
 
   const handleExport = () => {
     if (!activeDoc) return;
-    const blob = new Blob([content.replace(/<[^>]+>/g, "")], {
-      type: "text/html",
+    const plainText = content.replace(/<[^>]+>/g, "");
+    const blob = new Blob([plainText], {
+      type: "text/plain",
     });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${title || "document"}.html`;
+    a.download = `${title || "document"}.txt`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("Document exported");
+    toast.success("Document downloaded");
   };
 
   const handleShare = () => {
@@ -133,68 +147,110 @@ export default function EditorCenter({
     >
       {/* Dark navy title bar */}
       <div
-        className="editor-title-bar flex items-center justify-between px-4 h-11 shrink-0"
+        className="editor-title-bar flex items-center justify-between px-3 md:px-4 h-11 shrink-0 gap-2"
         data-ocid="editor.title.panel"
       >
-        <div className="flex items-center gap-2 min-w-0">
+        {/* Title + unsaved indicator */}
+        <div className="flex items-center gap-2 min-w-0 flex-1">
           <input
             data-ocid="editor.title.input"
-            className="bg-transparent text-white font-semibold text-[15px] outline-none placeholder:text-white/40 truncate min-w-0"
+            className="bg-transparent text-white font-semibold text-[15px] outline-none placeholder:text-white/40 truncate min-w-0 w-full"
             value={title}
             onChange={(e) => onTitleChange(e.target.value)}
             placeholder="Untitled document"
             style={{ caretColor: "white" }}
           />
           {hasUnsaved && (
-            <span className="text-[11px] text-white/50 shrink-0">
+            <span className="text-[11px] text-white/50 shrink-0 hidden sm:inline">
               (unsaved)
             </span>
           )}
         </div>
 
         {/* Action buttons */}
-        <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex items-center gap-1 shrink-0">
+          {/* Save — always visible */}
           <Button
             data-ocid="editor.save.primary_button"
             size="sm"
-            className="h-7 px-3 text-[12px] font-medium rounded-full bg-white/15 hover:bg-white/25 text-white border-0"
+            className="h-7 px-2.5 md:px-3 text-[12px] font-medium rounded-full bg-white/15 hover:bg-white/25 text-white border-0"
             onClick={onSave}
             disabled={isSaving}
           >
             {isSaving ? (
-              <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+              <Loader2 className="w-3 h-3 md:mr-1 animate-spin" />
             ) : (
-              <Save className="w-3 h-3 mr-1" />
+              <Save className="w-3 h-3 md:mr-1" />
             )}
-            Save
+            <span className="hidden md:inline">
+              {isSaving ? "Saving…" : "Save"}
+            </span>
           </Button>
+
+          {/* Download — always visible and prominent */}
           <Button
             data-ocid="editor.export.button"
             size="sm"
-            className="h-7 px-3 text-[12px] font-medium rounded-full bg-white/15 hover:bg-white/25 text-white border-0"
+            className="h-7 px-2.5 md:px-3 text-[12px] font-medium rounded-full bg-white/20 hover:bg-white/35 text-white border border-white/20"
             onClick={handleExport}
           >
-            <Download className="w-3 h-3 mr-1" />
-            Export
+            <Download className="w-3 h-3 md:mr-1" />
+            <span className="hidden md:inline">Download</span>
           </Button>
+
+          {/* Share — hidden on smallest screens, visible on sm+ */}
           <Button
             data-ocid="editor.share.button"
             size="sm"
-            className="h-7 px-3 text-[12px] font-medium rounded-full bg-white/15 hover:bg-white/25 text-white border-0"
+            className="hidden sm:flex h-7 px-2.5 md:px-3 text-[12px] font-medium rounded-full bg-white/15 hover:bg-white/25 text-white border-0"
             onClick={handleShare}
           >
-            <Share2 className="w-3 h-3 mr-1" />
-            Share
+            <Share2 className="w-3 h-3 md:mr-1" />
+            <span className="hidden md:inline">Share</span>
           </Button>
+
+          {/* Version History — hidden on small screens */}
           <Button
             data-ocid="editor.version_history.button"
             size="sm"
-            className="h-7 px-3 text-[12px] font-medium rounded-full bg-white/15 hover:bg-white/25 text-white border-0"
+            className="hidden lg:flex h-7 px-3 text-[12px] font-medium rounded-full bg-white/15 hover:bg-white/25 text-white border-0"
             onClick={onShowVersionHistory}
           >
             <Clock className="w-3 h-3 mr-1" />
             Version History
           </Button>
+
+          {/* More dropdown — visible on mobile/tablet to access hidden actions */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                data-ocid="editor.more.button"
+                size="sm"
+                className="lg:hidden h-7 w-7 px-0 text-[12px] font-medium rounded-full bg-white/15 hover:bg-white/25 text-white border-0"
+                aria-label="More actions"
+              >
+                <MoreHorizontal className="w-3.5 h-3.5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuItem
+                data-ocid="editor.more.share.button"
+                onClick={handleShare}
+                className="gap-2 text-sm cursor-pointer sm:hidden"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                Share
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                data-ocid="editor.more.version_history.button"
+                onClick={onShowVersionHistory}
+                className="gap-2 text-sm cursor-pointer"
+              >
+                <Clock className="w-3.5 h-3.5" />
+                Version History
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -203,27 +259,37 @@ export default function EditorCenter({
 
       {/* Editor canvas */}
       <div
-        className="flex-1 overflow-y-auto py-8 px-6"
+        className="flex-1 overflow-y-auto py-4 px-2 md:py-8 md:px-6"
         style={{ background: "oklch(0.945 0.01 240)" }}
       >
         <motion.div
           className="mx-auto bg-white rounded-sm editor-page-shadow"
-          style={{ maxWidth: 760, minHeight: 900, padding: "52px 64px" }}
+          style={{
+            maxWidth: 760,
+            minHeight: 900,
+          }}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25 }}
           key={activeDoc?.id?.toString()}
         >
           <div
-            ref={editorRef}
-            data-ocid="editor.canvas_target"
-            contentEditable
-            suppressContentEditableWarning
-            className="editor-content"
-            data-placeholder="Start typing your document…"
-            onInput={handleInput}
-            spellCheck
-          />
+            className="editor-page-padding"
+            style={{
+              padding: "clamp(16px, 4vw, 52px) clamp(14px, 5vw, 64px)",
+            }}
+          >
+            <div
+              ref={editorRef}
+              data-ocid="editor.canvas_target"
+              contentEditable
+              suppressContentEditableWarning
+              className="editor-content"
+              data-placeholder="Start typing your document…"
+              onInput={handleInput}
+              spellCheck
+            />
+          </div>
         </motion.div>
       </div>
 

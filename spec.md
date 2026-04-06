@@ -1,31 +1,35 @@
 # EditFlow
 
 ## Current State
-New project with empty backend and no frontend implementation.
+EditFlow is a full document editor with:
+- Fixed 260px left sidebar (document list, folders, nav)
+- Fixed editor center with title bar, formatting toolbar, content canvas
+- Fixed 240px right panel (collaborators, comments)
+- TopNav with search, nav links, user menu
+- Download button in the editor title bar (desktop only accessible)
+- No mobile responsiveness — sidebars always visible, layout breaks on small screens
 
 ## Requested Changes (Diff)
 
 ### Add
-- Full-featured web-based document editing application
-- Document management: create, rename, delete, list documents
-- Rich text editor with formatting toolbar (bold, italic, underline, font size, alignment, lists)
-- Document sidebar with navigation sections (All Docs, Templates, Trash, Folders)
-- Collaborators panel (UI placeholder)
-- Comments panel (UI placeholder)
-- Document title editing
-- Save, Export (text download), and Share (copy link) actions
-- Version history tracking (store timestamps of saves)
-- Search documents functionality
+- Mobile-responsive layout: on small screens (< md), show only the editor center by default; sidebar and right panel accessible via drawer/sheet overlays or bottom nav
+- A floating/accessible download button on mobile (e.g. in a mobile toolbar or bottom bar)
+- Hamburger/menu button in TopNav on mobile to open the left sidebar sheet
+- A mobile bottom bar or floating action area with key actions: New Doc, Download, Version History
 
 ### Modify
-- N/A (new project)
+- `EditorLayout.tsx`: add mobile state for sidebar and right panel open/close; render LeftSidebar inside a Sheet on mobile
+- `TopNav.tsx`: add hamburger button on mobile to toggle sidebar; hide nav links on mobile
+- `EditorCenter.tsx`: ensure the title bar action buttons are scrollable or collapsed into a dropdown on very small screens so Download is always reachable
+- `LeftSidebar.tsx`: work both as a fixed sidebar (desktop) and as content inside a Sheet (mobile)
+- `RightPanel.tsx`: hide on mobile or make it accessible via a button
 
 ### Remove
-- N/A (new project)
+- Nothing removed
 
 ## Implementation Plan
-1. Backend: Document CRUD (create, read, update, delete), version history per document, search by title
-2. Frontend: Three-column layout matching the design preview — sidebar, editor, right panel
-3. Rich text editing using contenteditable div with execCommand-based formatting toolbar
-4. Wire all backend calls: load documents on mount, save on button click, create/delete documents
-5. State management for active document, editor content, formatting state
+1. Modify `EditorLayout.tsx` to manage `mobileLeftOpen` and `mobileRightOpen` state; wrap LeftSidebar in a Sheet component on mobile
+2. Modify `TopNav.tsx` to add a hamburger Menu button on mobile that calls `onMobileMenuOpen` prop
+3. Modify `EditorCenter.tsx` to wrap the action buttons row in a horizontally scrollable container on mobile, or collapse Save/Share/Version History into a dropdown on small screens, keeping Download prominent
+4. Ensure the entire layout uses responsive Tailwind classes so the sidebar is hidden on mobile (hidden md:flex) and the editor takes full width
+5. Add a minimal mobile floating bar at the bottom of the editor for quick access to Download
